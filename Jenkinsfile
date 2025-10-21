@@ -139,17 +139,17 @@ pipeline {
         }
 
 
-        // stage("OWASP Dependency Check Scan") {
-        //     steps {
-        //         dependencyCheck additionalArguments: '''
-        //             --scan . 
-        //             --disableYarnAudit 
-        //             --disableNodeAudit 
-        //         ''',
-        //         odcInstallation: 'dp-check'
-        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-        //     }
-        // }
+        stage("OWASP Dependency Check Scan") {
+            steps {
+                dependencyCheck additionalArguments: '''
+                    --scan . 
+                    --disableYarnAudit 
+                    --disableNodeAudit 
+                ''',
+                odcInstallation: 'dp-check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
 
         stage("Trivy File Scan") {
             steps {
@@ -168,13 +168,18 @@ stage("Build Docker Image") {
 
             env.IMAGE_TAG = "${imageName}:${buildNumber}"
 
+//remove old images if there.
+            sh "docker rmi -f ${IMAGE_NAME}:local ${env.IMAGE_TAG} || true"
+//build new image
+//docker tag ${imageName}:latest ${env.IMAGE_TAG}
             sh """
                 echo '🧱 Building Docker image locally...'
-                docker build -t ${imageName}:latest .
-                docker tag ${imageName}:latest ${env.IMAGE_TAG}
+                docker build -t ${imageName}:local .
+                
                 echo "✅ Built local image: ${env.IMAGE_TAG}"
             """
         }
+        
     }
 }
 
