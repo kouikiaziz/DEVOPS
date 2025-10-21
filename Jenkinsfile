@@ -60,7 +60,7 @@ pipeline {
             }
         }
         
-        stage('CODE ANALYSIS WITH CHECKSTYLE') {
+        stage('SAST CODE ANALYSIS WITH CHECKSTYLE') {
             steps {
                 sh 'mvn checkstyle:checkstyle'
             }
@@ -71,7 +71,7 @@ pipeline {
             }
         }
 
-        stage('CODE ANALYSIS with SONARQUBE') {
+        stage('SAST CODE ANALYSIS with SONARQUBE') {
             steps {
                 withSonarQubeEnv('sonar-server') {
                     sh '''${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
@@ -139,7 +139,7 @@ pipeline {
         }
 
 
-        stage("OWASP Dependency Check Scan") {
+        stage("SAST OWASP Dependency Check Scan") {
             steps {
                 dependencyCheck additionalArguments: '''
                     --scan . 
@@ -167,12 +167,12 @@ stage("Build Docker Image") {
             def buildNumber =  "local"
 
             env.IMAGE_TAG = "${imageName}:${buildNumber}"
-///
 //remove old images if there.
             sh "docker stop ${imageName} || true"
             sh "docker remove ${imageName} || true"
             sh "docker image remove ${imageName}:${buildNumber} || true"
             sh "docker image remove ${imageName}:latest || true"
+
 //build new image
 //docker tag ${imageName}:latest ${env.IMAGE_TAG}
             sh """
