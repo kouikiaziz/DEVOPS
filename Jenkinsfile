@@ -170,7 +170,7 @@ stage("Build Docker Image") {
 
 //remove old images if there.
             sh "docker stop ${imageName} || true"
-            sh "docker remove ${imageName} | true"
+            sh "docker remove ${imageName} || true"
             sh "docker image remove ${imageName}:${buildNumber} || true"
             sh "docker image remove ${imageName}:latest || true"
 //build new image
