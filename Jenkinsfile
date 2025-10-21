@@ -214,7 +214,7 @@ stage("Build Docker Image") {
                 }
             }
         }
-
+//
         stage("DAST Scan with OWASP ZAP") {
             steps {
                 script {
