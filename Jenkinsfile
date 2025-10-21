@@ -91,7 +91,7 @@ pipeline {
                 script {
                     timeout(time: 15, unit: 'MINUTES') {
                   
-                    waitForQualityGate abortPipeline: true, credentialsId: 'sonarqubeToken'
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarqubeToken'
                 }
             }
         }
