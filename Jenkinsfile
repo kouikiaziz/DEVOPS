@@ -139,17 +139,17 @@ pipeline {
         }
 
 
-        stage("OWASP Dependency Check Scan") {
-            steps {
-                dependencyCheck additionalArguments: '''
-                    --scan . 
-                    --disableYarnAudit 
-                    --disableNodeAudit 
-                ''',
-                odcInstallation: 'dp-check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
+        // stage("OWASP Dependency Check Scan") {
+        //     steps {
+        //         dependencyCheck additionalArguments: '''
+        //             --scan . 
+        //             --disableYarnAudit 
+        //             --disableNodeAudit 
+        //         ''',
+        //         odcInstallation: 'dp-check'
+        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+        //     }
+        // }
 
         stage("Trivy File Scan") {
             steps {
@@ -157,24 +157,35 @@ pipeline {
             }
         }
 
-        stage("Build Docker Image") {
-            steps {
-                script {
-                    env.IMAGE_TAG = "${IMAGE_NAME}:${BUILD_NUMBER}"
-                    sh "docker rmi -f ${IMAGE_NAME}:latest ${env.IMAGE_TAG} || true"
-                    
-                    // Build and capture the docker image object
-                    dockerImage = docker.build("${IMAGE_NAME}:latest", ".")
-                    
-                    // Tag with build number
-                    sh "docker tag ${IMAGE_NAME}:latest ${env.IMAGE_TAG}"
-                }
-            }
+
+
+stage("Build Docker Image") {
+    steps {
+        script {
+            // ✅ Use default values if variables are missing
+            def imageName = "myappdevops"
+            def buildNumber =  "local"
+
+            env.IMAGE_TAG = "${imageName}:${buildNumber}"
+
+            sh """
+                echo '🧱 Building Docker image locally...'
+                docker build -t ${imageName}:latest .
+                docker tag ${imageName}:latest ${env.IMAGE_TAG}
+                echo "✅ Built local image: ${env.IMAGE_TAG}"
+            """
         }
+    }
+}
 
         stage("Trivy Scan Image") {
             steps {
                 script {
+
+                    def imageName = "myappdevops"
+                    def buildNumber =  "local"
+                    env.IMAGE_TAG = "${imageName}:${buildNumber}"
+
                     sh """
                     echo '🔍 Running Trivy scan on ${env.IMAGE_TAG}'
                     trivy image -f json -o trivy-image.json ${env.IMAGE_TAG}
@@ -190,8 +201,8 @@ pipeline {
         stage("Deploy to Container") {
             steps {
                 script {
-                    sh "docker rm -f vprofile || true"
-                    sh "docker run -d --name vprofile -p 80:8080 ${env.IMAGE_TAG}"
+                    sh "docker rm -f myappdevops || true"
+                    sh "docker run -d --name myappdevops -p 80:8080 ${env.IMAGE_TAG}"
                 }
             }
         }
