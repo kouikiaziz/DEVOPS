@@ -169,7 +169,8 @@ stage("Build Docker Image") {
             env.IMAGE_TAG = "${imageName}:${buildNumber}"
 
 //remove old images if there.
-            sh "docker rmi -f ${IMAGE_NAME}:local ${env.IMAGE_TAG} || true"
+            sh "docker image remove ${imageName}:${buildNumber}"
+            sh "docker image remove ${imageName}:latest"
 //build new image
 //docker tag ${imageName}:latest ${env.IMAGE_TAG}
             sh """
