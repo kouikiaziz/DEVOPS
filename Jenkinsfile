@@ -262,18 +262,31 @@ pipeline {
                 def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'GitHub User'
                 def buildUrl = "${env.BUILD_URL}"
 
+                // 🟢 Slack Notification
+                slackSend(
+                    channel: '#devsecopscicd',
+                    color: COLOR_MAP[buildStatus],
+                    message: """*${buildStatus}:* Job *${env.JOB_NAME}* Build #${env.BUILD_NUMBER}
+                    👤 *Started by:* ${buildUser}
+                    🔗 *Build URL:* <${buildUrl}|Click Here for Details>"""
+                )
 
                 // 📧 Email Notification
             emailext (
                 subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """                                   
                     <p>Maven App-tier DevSecops CICD pipeline status.</p>
-                    zebi
+                    <p>Project: ${env.JOB_NAME}</p>
+                    <p>Build Number: ${env.BUILD_NUMBER}</p>
+                    <p>Build Status: ${buildStatus}</p>
+                    <p>Started by: ${buildUser}</p>
+                    <p>Build URL: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                    <script>alert(1)</script>
                 """,
-                to: 'kouikiaziz@gmail.com',
+                to: 'unknownchapo0@gmail.com',
                 from: 'kouikiaziz@gmail.com',
                 mimeType: 'text/html',
-                //attachmentsPattern: 'trivyfs.txt,trivy-image.json,trivy-image.txt,dependency-check-report.xml,zap_report.html,zap_report.json'
+                attachmentsPattern: 'trivyfs.txt,trivy-image.json,trivy-image.txt,dependency-check-report.xml,zap_report.html,zap_report.json'
                     )
             }
         }
