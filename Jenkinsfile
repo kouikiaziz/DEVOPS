@@ -139,117 +139,109 @@ pipeline {
         }
 
 
+        stage("OWASP Dependency Check Scan") {
+            steps {
+                dependencyCheck additionalArguments: '''
+                    --scan . 
+                    --disableYarnAudit 
+                    --disableNodeAudit 
+                ''',
+                odcInstallation: 'dp-check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
 
+        stage("Trivy File Scan") {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+            }
+        }
 
-
-        
-        
-        
-        
-
-        // stage("OWASP Dependency Check Scan") {
-        //     steps {
-        //         dependencyCheck additionalArguments: '''
-        //             --scan . 
-        //             --disableYarnAudit 
-        //             --disableNodeAudit 
-        //         ''',
-        //         odcInstallation: 'dp-check'
-        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-        //     }
-        // }
-
-        // stage("Trivy File Scan") {
-        //     steps {
-        //         sh "trivy fs . > trivyfs.txt"
-        //     }
-        // }
-
-        // stage("Build Docker Image") {
-        //     steps {
-        //         script {
-        //             env.IMAGE_TAG = "${IMAGE_NAME}:${BUILD_NUMBER}"
-        //             sh "docker rmi -f ${IMAGE_NAME}:latest ${env.IMAGE_TAG} || true"
+        stage("Build Docker Image") {
+            steps {
+                script {
+                    env.IMAGE_TAG = "${IMAGE_NAME}:${BUILD_NUMBER}"
+                    sh "docker rmi -f ${IMAGE_NAME}:latest ${env.IMAGE_TAG} || true"
                     
-        //             // Build and capture the docker image object
-        //             dockerImage = docker.build("${IMAGE_NAME}:latest", ".")
+                    // Build and capture the docker image object
+                    dockerImage = docker.build("${IMAGE_NAME}:latest", ".")
                     
-        //             // Tag with build number
-        //             sh "docker tag ${IMAGE_NAME}:latest ${env.IMAGE_TAG}"
-        //         }
-        //     }
-        // }
+                    // Tag with build number
+                    sh "docker tag ${IMAGE_NAME}:latest ${env.IMAGE_TAG}"
+                }
+            }
+        }
 
-        // stage("Trivy Scan Image") {
-        //     steps {
-        //         script {
-        //             sh """
-        //             echo '🔍 Running Trivy scan on ${env.IMAGE_TAG}'
-        //             trivy image -f json -o trivy-image.json ${env.IMAGE_TAG}
-        //             trivy image -f table -o trivy-image.txt ${env.IMAGE_TAG}
-        //             """
-        //         }
-        //     }
-        // }
+        stage("Trivy Scan Image") {
+            steps {
+                script {
+                    sh """
+                    echo '🔍 Running Trivy scan on ${env.IMAGE_TAG}'
+                    trivy image -f json -o trivy-image.json ${env.IMAGE_TAG}
+                    trivy image -f table -o trivy-image.txt ${env.IMAGE_TAG}
+                    """
+                }
+            }
+        }
         
 
        
 
-        // stage("Deploy to Container") {
-        //     steps {
-        //         script {
-        //             sh "docker rm -f vprofile || true"
-        //             sh "docker run -d --name vprofile -p 80:8080 ${env.IMAGE_TAG}"
-        //         }
-        //     }
-        // }
+        stage("Deploy to Container") {
+            steps {
+                script {
+                    sh "docker rm -f vprofile || true"
+                    sh "docker run -d --name vprofile -p 80:8080 ${env.IMAGE_TAG}"
+                }
+            }
+        }
 
-        // stage("DAST Scan with OWASP ZAP") {
-        //     steps {
-        //         script {
-        //             echo '🔍 Running OWASP ZAP baseline scan...'
+        stage("DAST Scan with OWASP ZAP") {
+            steps {
+                script {
+                    echo '🔍 Running OWASP ZAP baseline scan...'
 
-        //             // Run ZAP but ignore exit code
-        //             def exitCode = sh(script: '''
-        //                 docker run --rm --user root --network host -v $(pwd):/zap/wrk:rw \
-        //                 -t zaproxy/zap-stable zap-baseline.py \
-        //                 -t http://localhost \
-        //                 -r zap_report.html -J zap_report.json
-        //             ''', returnStatus: true)
+                    // Run ZAP but ignore exit code
+                    def exitCode = sh(script: '''
+                        docker run --rm --user root --network host -v $(pwd):/zap/wrk:rw \
+                        -t zaproxy/zap-stable zap-baseline.py \
+                        -t http://localhost \
+                        -r zap_report.html -J zap_report.json
+                    ''', returnStatus: true)
 
-        //             echo "ZAP scan finished with exit code: ${exitCode}"
+                    echo "ZAP scan finished with exit code: ${exitCode}"
 
-        //             // Read the JSON report if it exists
-        //             if (fileExists('zap_report.json')) {
-        //                 def zapJson = readJSON file: 'zap_report.json'
+                    // Read the JSON report if it exists
+                    if (fileExists('zap_report.json')) {
+                        def zapJson = readJSON file: 'zap_report.json'
 
-        //                 def highCount = zapJson.site.collect { site ->
-        //                     site.alerts.findAll { it.risk == 'High' }.size()
-        //                 }.sum()
+                        def highCount = zapJson.site.collect { site ->
+                            site.alerts.findAll { it.risk == 'High' }.size()
+                        }.sum()
 
-        //                 def mediumCount = zapJson.site.collect { site ->
-        //                     site.alerts.findAll { it.risk == 'Medium' }.size()
-        //                 }.sum()
+                        def mediumCount = zapJson.site.collect { site ->
+                            site.alerts.findAll { it.risk == 'Medium' }.size()
+                        }.sum()
 
-        //                 def lowCount = zapJson.site.collect { site ->
-        //                     site.alerts.findAll { it.risk == 'Low' }.size()
-        //                 }.sum()
+                        def lowCount = zapJson.site.collect { site ->
+                            site.alerts.findAll { it.risk == 'Low' }.size()
+                        }.sum()
 
-        //                 echo "✅ High severity issues: ${highCount}"
-        //                 echo "⚠️ Medium severity issues: ${mediumCount}"
-        //                 echo "ℹ️ Low severity issues: ${lowCount}"
-        //             } else {
-        //                 echo "ZAP JSON report not found, continuing build..."
-        //             }
-        //         }
-        //     }
-        //     post {
-        //         always {
-        //             echo '📦 Archiving ZAP scan reports...'
-        //             archiveArtifacts artifacts: 'zap_report.html,zap_report.json', allowEmptyArchive: true
-        //         }
-        //     }
-        // }
+                        echo "✅ High severity issues: ${highCount}"
+                        echo "⚠️ Medium severity issues: ${mediumCount}"
+                        echo "ℹ️ Low severity issues: ${lowCount}"
+                    } else {
+                        echo "ZAP JSON report not found, continuing build..."
+                    }
+                }
+            }
+            post {
+                always {
+                    echo '📦 Archiving ZAP scan reports...'
+                    archiveArtifacts artifacts: 'zap_report.html,zap_report.json', allowEmptyArchive: true
+                }
+            }
+        }
 
 
     }
