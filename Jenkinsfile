@@ -169,8 +169,10 @@ stage("Build Docker Image") {
             env.IMAGE_TAG = "${imageName}:${buildNumber}"
 
 //remove old images if there.
-            sh "docker image remove ${imageName}:${buildNumber}"
-            sh "docker image remove ${imageName}:latest"
+            sh "docker stop ${imageName} || true"
+            sh "docker remove ${imageName} | true"
+            sh "docker image remove ${imageName}:${buildNumber} || true"
+            sh "docker image remove ${imageName}:latest || true"
 //build new image
 //docker tag ${imageName}:latest ${env.IMAGE_TAG}
             sh """
