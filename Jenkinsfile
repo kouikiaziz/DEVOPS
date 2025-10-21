@@ -88,21 +88,7 @@ pipeline {
         }
 
 
-
-        stage("Quality Gate") {
-        steps {
-            script {
-                timeout(time: 5, unit: 'MINUTES') {
-                    def qg = waitForQualityGate abortPipeline: false, credentialsId: 'sonarqubeToken'
-                    echo "Quality Gate status: ${qg.status}"
-                            }
-                    }
-            }
-        }
-
-
-
-        stage("Publish to Nexus Repository Manager") {
+stage("Publish to Nexus Repository Manager") {
             steps {
                 script {
                     pom = readMavenPom file: "pom.xml"
@@ -137,6 +123,23 @@ pipeline {
                 }
             }
         }
+        
+
+
+        stage("Quality Gate") {
+        steps {
+            script {
+                timeout(time: 5, unit: 'MINUTES') {
+                    def qg = waitForQualityGate abortPipeline: false, credentialsId: 'sonarqubeToken'
+                    echo "Quality Gate status: ${qg.status}"
+                            }
+                    }
+            }
+        }
+
+
+
+        
         
         
         
