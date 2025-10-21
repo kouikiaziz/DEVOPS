@@ -11,7 +11,7 @@ pipeline {
     }
     environment {
 
-        SCANNER_HOME = tool 'sonar-scanner'
+        SCANNER_HOME = tool 'sonarqube'
 
         NEXUS_VERSION = 'nexus3'
         NEXUS_PROTOCOL = "http"
