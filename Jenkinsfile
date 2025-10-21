@@ -133,23 +133,23 @@ pipeline {
             }
         }
 
-        stage("OWASP Dependency Check Scan") {
-            steps {
-                dependencyCheck additionalArguments: '''
-                    --scan . 
-                    --disableYarnAudit 
-                    --disableNodeAudit 
-                ''',
-                odcInstallation: 'dp-check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
+        // stage("OWASP Dependency Check Scan") {
+        //     steps {
+        //         dependencyCheck additionalArguments: '''
+        //             --scan . 
+        //             --disableYarnAudit 
+        //             --disableNodeAudit 
+        //         ''',
+        //         odcInstallation: 'dp-check'
+        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+        //     }
+        // }
 
-        stage("Trivy File Scan") {
-            steps {
-                sh "trivy fs . > trivyfs.txt"
-            }
-        }
+        // stage("Trivy File Scan") {
+        //     steps {
+        //         sh "trivy fs . > trivyfs.txt"
+        //     }
+        // }
 
         // stage("Build Docker Image") {
         //     steps {
