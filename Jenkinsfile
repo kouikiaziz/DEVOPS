@@ -88,6 +88,20 @@ pipeline {
         }
 
 
+
+        stage("Quality Gate") {
+        steps {
+            script {
+                timeout(time: 5, unit: 'MINUTES') {
+                    def qg = waitForQualityGate abortPipeline: false, credentialsId: 'sonarqubeToken'
+                    echo "Quality Gate status: ${qg.status}"
+                            }
+                    }
+            }
+        }
+
+
+
         stage("Publish to Nexus Repository Manager") {
             steps {
                 script {
@@ -124,18 +138,7 @@ pipeline {
             }
         }
         
-
-        stage("Quality Gate") {
-        steps {
-            script {
-                timeout(time: 5, unit: 'MINUTES') {
-                    def qg = waitForQualityGate abortPipeline: false, credentialsId: 'sonarqubeToken'
-                    echo "Quality Gate status: ${qg.status}"
-                            }
-                    }
-            }
-        }
-
+        
         
 
         // stage("OWASP Dependency Check Scan") {
