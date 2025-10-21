@@ -167,7 +167,7 @@ stage("Build Docker Image") {
             def buildNumber =  "local"
 
             env.IMAGE_TAG = "${imageName}:${buildNumber}"
-//
+///
 //remove old images if there.
             sh "docker stop ${imageName} || true"
             sh "docker remove ${imageName} || true"
