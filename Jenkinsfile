@@ -90,16 +90,15 @@ pipeline {
 
 
 
-        stage("Quality Gate") {
-        steps {
-            script {
-                timeout(time: 1, unit: 'MINUTES') {
-                    def qg = waitForQualityGate abortPipeline: false, credentialsId: 'sonarqubeToken'
-                    echo "Quality Gate status: ${qg.status}"
-                            }
-                    }
+ stage("Quality Gate") {
+    steps {
+        script {
+            timeout(time: 1, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: false, credentialsId: 'sonarqubeToken'
             }
         }
+    }
+}
 
 
 
