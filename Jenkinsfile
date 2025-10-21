@@ -265,15 +265,6 @@ stage("Build Docker Image") {
                 def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'GitHub User'
                 def buildUrl = "${env.BUILD_URL}"
 
-                // 🟢 Slack Notification
-                slackSend(
-                    channel: '#devsecopscicd',
-                    color: COLOR_MAP[buildStatus],
-                    message: """*${buildStatus}:* Job *${env.JOB_NAME}* Build #${env.BUILD_NUMBER}
-                    👤 *Started by:* ${buildUser}
-                    🔗 *Build URL:* <${buildUrl}|Click Here for Details>"""
-                )
-
                 // 📧 Email Notification
             emailext (
                 subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
@@ -284,9 +275,8 @@ stage("Build Docker Image") {
                     <p>Build Status: ${buildStatus}</p>
                     <p>Started by: ${buildUser}</p>
                     <p>Build URL: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                    <script>alert(1)</script>
                 """,
-                to: 'unknownchapo0@gmail.com',
+                to: 'kouikiaziz@gmail.com',
                 from: 'kouikiaziz@gmail.com',
                 mimeType: 'text/html',
                 attachmentsPattern: 'trivyfs.txt,trivy-image.json,trivy-image.txt,dependency-check-report.xml,zap_report.html,zap_report.json'
