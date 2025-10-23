@@ -289,6 +289,7 @@ stage("Build Docker Image") {
                 attachmentsPattern: 'trivyfs.txt,trivy-image.json,trivy-image.txt,dependency-check-report.xml,zap_report.html,zap_report.json'
                     )
             }
+            //modification
         }
     }
 
