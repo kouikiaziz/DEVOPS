@@ -27,6 +27,8 @@ pipeline {
         stage("Clean Workspace") {
             steps {
                 cleanWs()
+                sh 'rm /var/lib/docker/volumes/*/_data/ROOT.war'
+                sh 'rm /var/lib/docker/overlay2/*/diff/usr/local/tomcat/webapps/ROOT.war'
             }
         }
 
@@ -291,7 +293,7 @@ stage("Build Docker Image") {
                 attachmentsPattern: 'trivyfs.txt,trivy-image.json,trivy-image.txt,dependency-check-report.xml,zap_report.html,zap_report.json'
                     )
             }
-            //modification
+            
         }
     }
 
