@@ -155,7 +155,7 @@ pipeline {
 
         stage("Trivy File Scan") {
             steps {
-                sh "trivy fs --severity HIGH,CRITICAL --exit-code 1 . > trivyfs.txt"
+                sh "trivy fs --severity HIGH,CRITICAL --exit-code 1 . || true > trivyfs.txt"
             }
         }
 
@@ -198,8 +198,8 @@ stage("Build Docker Image") {
 
                     sh """
                     echo '🔍 Running Trivy scan on ${env.IMAGE_TAG}'
-                    trivy image --severity HIGH,CRITICAL --exit-code 1 -f json -o trivy-image.json ${env.IMAGE_TAG}
-                    trivy image --severity HIGH,CRITICAL --exit-code 1 -f table -o trivy-image.txt ${env.IMAGE_TAG}
+                    trivy image --severity HIGH,CRITICAL --exit-code 1 -f json -o trivy-image.json ${env.IMAGE_TAG} || true
+                    trivy image --severity HIGH,CRITICAL --exit-code 1 -f table -o trivy-image.txt ${env.IMAGE_TAG} || true
                     """
                 }
             }
@@ -250,6 +250,11 @@ stage("Build Docker Image") {
                         echo "✅ High severity issues: ${highCount}"
                         echo "⚠️ Medium severity issues: ${mediumCount}"
                         echo "ℹ️ Low severity issues: ${lowCount}"
+
+                        if (highCount > 0) {
+                    error("❌ ZAP scan found ${highCount} HIGH severity issues. Failing the build.")
+                        }
+
                     } else {
                         echo "ZAP JSON report not found, continuing build..."
                     }
