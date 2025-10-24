@@ -40,6 +40,7 @@ pipeline {
             steps {
                 sh 'mvn clean install -DskipTests'
             }
+
             post {
                 success {
                     echo 'Now Archiving...'
@@ -64,6 +65,7 @@ pipeline {
             steps {
                 sh 'mvn checkstyle:checkstyle'
             }
+
             post {
                 success {
                     echo 'Generated Analysis Result'
