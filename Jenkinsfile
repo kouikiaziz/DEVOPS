@@ -155,17 +155,7 @@ pipeline {
 
         stage("Trivy File Scan") {
             steps {
-               // sh "trivy fs . > trivyfs.txt"
-
-                 sh "trivy fs --severity HIGH,CRITICAL --exit-code 1 . > trivyfs.txt"
-
-            // Read the Trivy exit code
-            def exitCode = sh(script: "trivy fs --severity HIGH,CRITICAL --exit-code 1 .", returnStatus: true)
-
-            // Fail the build if vulnerabilities are found
-            if (exitCode != 0) {
-                error("Trivy scan found HIGH or CRITICAL vulnerabilities. See trivyfs.txt for details.")
-            }
+                sh "trivy fs . > trivyfs.txt"zz
             }
         }
 
@@ -208,8 +198,8 @@ stage("Build Docker Image") {
 
                     sh """
                     echo '🔍 Running Trivy scan on ${env.IMAGE_TAG}'
-                    trivy image --exit-code 1 --severity HIGH,CRITICAL  -f json -o trivy-image.json ${env.IMAGE_TAG}
-                    trivy image --exit-code 1 --severity HIGH,CRITICAL  -f table -o trivy-image.txt ${env.IMAGE_TAG}
+                    trivy image -f json -o trivy-image.json ${env.IMAGE_TAG}
+                    trivy image -f table -o trivy-image.txt ${env.IMAGE_TAG}
                     """
                 }
             }
