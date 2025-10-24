@@ -27,8 +27,8 @@ pipeline {
         stage("Clean Workspace") {
             steps {
                 cleanWs()
-                sh 'rm /var/lib/docker/volumes/*/_data/ROOT.war'
-                sh 'rm /var/lib/docker/overlay2/*/diff/usr/local/tomcat/webapps/ROOT.war'
+                sh 'sudo rm /var/lib/docker/volumes/*/_data/ROOT.war'
+                sh 'sudo rm /var/lib/docker/overlay2/*/diff/usr/local/tomcat/webapps/ROOT.war'
             }
         }
 
