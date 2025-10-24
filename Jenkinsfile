@@ -155,7 +155,7 @@ pipeline {
 
         stage("Trivy File Scan") {
             steps {
-                sh "trivy fs --severity HIGH,CRITICAL --exit-code 1 . || true > trivyfs.txt"
+                sh "trivy fs --severity HIGH,CRITICAL --exit-code 1 .  > trivyfs.txt || true"
             }
         }
 
@@ -233,23 +233,35 @@ stage("Build Docker Image") {
 
                     // Read the JSON report if it exists
                     if (fileExists('zap_report.json')) {
-                        def zapJson = readJSON file: 'zap_report.json'
+                        // def zapJson = readJSON file: 'zap_report.json'
 
-                        def highCount = zapJson.site.collect { site ->
-                            site.alerts.findAll { it.risk == 'High' }.size()
-                        }.sum()
+                        // def highCount = zapJson.site.collect { site ->
+                        //     site.alerts.findAll { it.risk == 'High' }.size()
+                        // }.sum()
 
-                        def mediumCount = zapJson.site.collect { site ->
-                            site.alerts.findAll { it.risk == 'Medium' }.size()
-                        }.sum()
+                        // def mediumCount = zapJson.site.collect { site ->
+                        //     site.alerts.findAll { it.risk == 'Medium' }.size()
+                        // }.sum()
 
-                        def lowCount = zapJson.site.collect { site ->
-                            site.alerts.findAll { it.risk == 'Low' }.size()
-                        }.sum()
+                        // def lowCount = zapJson.site.collect { site ->
+                        //     site.alerts.findAll { it.risk == 'Low' }.size()
+                        // }.sum()
 
-                        echo "✅ High severity issues: ${highCount}"
-                        echo "⚠️ Medium severity issues: ${mediumCount}"
-                        echo "ℹ️ Low severity issues: ${lowCount}"
+                        // echo "✅ High severity issues: ${highCount}"
+                        // echo "⚠️ Medium severity issues: ${mediumCount}"
+                        // echo "ℹ️ Low severity issues: ${lowCount}"
+def highCount = 0
+
+                        zapJson.site.each { site ->
+    if (site.alerts) {
+        site.alerts.each { alert ->
+            // Normalize risk to lowercase to be safe
+            if ((alert.riskdesc ?: alert.risk ?: "").toLowerCase() == "high") {
+                highCount++
+            }
+        }
+    }
+}
 
                         if (highCount > 0) {
                     error("❌ ZAP scan found ${highCount} HIGH severity issues. Failing the build.")
