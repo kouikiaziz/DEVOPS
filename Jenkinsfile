@@ -155,7 +155,7 @@ pipeline {
 
         stage("Trivy File Scan") {
             steps {
-                sh "trivy fs . > trivyfs.txt"zz
+                sh "trivy fs --severity HIGH,CRITICAL --exit-code 1 . > trivyfs.txt"
             }
         }
 
@@ -198,8 +198,8 @@ stage("Build Docker Image") {
 
                     sh """
                     echo '🔍 Running Trivy scan on ${env.IMAGE_TAG}'
-                    trivy image -f json -o trivy-image.json ${env.IMAGE_TAG}
-                    trivy image -f table -o trivy-image.txt ${env.IMAGE_TAG}
+                    trivy image --severity HIGH,CRITICAL --exit-code 1 -f json -o trivy-image.json ${env.IMAGE_TAG}
+                    trivy image --severity HIGH,CRITICAL --exit-code 1 -f table -o trivy-image.txt ${env.IMAGE_TAG}
                     """
                 }
             }
